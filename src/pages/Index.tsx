@@ -9,14 +9,20 @@ import { Footer } from '@/components/Footer';
 import { UsernameModal } from '@/components/UsernameModal';
 
 function IndexContent() {
-  const { isConnected, username } = useWallet();
+  const { isConnected, username, profileLoaded } = useWallet();
   const [showUsernameModal, setShowUsernameModal] = useState(false);
 
   useEffect(() => {
-    if (isConnected && !username) {
+    // Only show username modal if:
+    // 1. User is connected
+    // 2. Profile has been loaded from Supabase
+    // 3. Username is still null (not set)
+    if (isConnected && profileLoaded && username === null) {
       setShowUsernameModal(true);
+    } else if (username !== null) {
+      setShowUsernameModal(false);
     }
-  }, [isConnected, username]);
+  }, [isConnected, username, profileLoaded]);
 
   return (
     <div className="min-h-screen bg-background">
