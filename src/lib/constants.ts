@@ -3,8 +3,8 @@ export const ADMIN_WALLET = '0x8334966329b7f4b459633696A8CA59118253bC89';
 
 // Token Info
 export const TOKEN_INFO = {
-  name: 'OverHippo.Lab',
-  symbol: 'OH.L',
+  name: "O'HippoLab",
+  symbol: 'OHL',
   decimals: 18,
   maxSupply: 250_000_000,
   network: 'OverProtocol',

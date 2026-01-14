@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "oracle": "Oracle",
+    "connectWallet": "Connect Wallet",
+    "connecting": "Connecting...",
+    "disconnect": "Disconnect"
+  },
+  "hero": {
+    "title": "Web3 Developer Community",
+    "subtitle": "Powered by OHL Oracle",
+    "cta": "Get Started"
+  },
+  "chat": {
+    "title": "Overworld Chat",
+    "placeholder": "Type your message...",
+    "oraclePlaceholder": "Ask the Oracle a question...",
+    "oracleMode": "Oracle Mode",
+    "connectToChat": "Connect your wallet to join the chat",
+    "send": "Send"
+  },
+  "pricing": {
+    "title": "Choose Your Access Level",
+    "subtitle": "Start free, upgrade when you need more power",
+    "free": "Free",
+    "freeDesc": "Connect & Explore",
+    "basic": "Basic Oracle",
+    "basicDesc": "Essential AI Access",
+    "dev": "DEV Mode",
+    "devDesc": "Pro Developer Tools",
+    "subscribe": "Subscribe Now",
+    "lifetime": "Lifetime access",
+    "oneTime": "One-time payment",
+    "selected": "Selected",
+    "currentPlan": "Current Plan",
+    "bestValue": "BEST VALUE",
+    "features": {
+      "connectWallet": "Connect wallet",
+      "viewChat": "View public chat",
+      "basicProfile": "Basic profile",
+      "everything": "Everything in Free",
+      "aiAssistant": "AI Oracle assistant",
+      "unlimitedQuestions": "Unlimited questions",
+      "priorityResponses": "Priority responses",
+      "everythingBasic": "Everything in Basic",
+      "advancedAi": "Advanced AI assistant",
+      "codeReview": "Code review & debugging",
+      "liquidityRewards": "Liquidity mining rewards",
+      "lpGrowth": "LP position growth",
+      "governance": "Governance voting"
+    },
+    "token": {
+      "title": "Platform Token",
+      "maxSupply": "Max Supply",
+      "network": "Network"
+    }
+  },
+  "features": {
+    "title": "Platform Features",
+    "subtitle": "Everything you need to build on OverProtocol"
+  },
+  "token": {
+    "specs": "Token Specifications",
+    "name": "Token Name",
+    "symbol": "Symbol",
+    "decimals": "Decimals",
+    "maxSupply": "Max Supply",
+    "blockchain": "Blockchain",
+    "chainId": "Chain ID",
+    "rpcUrl": "RPC URL"
+  },
+  "code": {
+    "copy": "Copy",
+    "copied": "Copied!",
+    "tip": "Copy this code and paste it in Remix IDE. Use Solidity compiler version 0.8.20 or newer."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  }
+}

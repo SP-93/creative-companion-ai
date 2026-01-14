@@ -1,11 +1,14 @@
 import { useWallet } from '@/contexts/WalletContext';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogOut, User, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ohlLogo from '@/assets/ohl-logo.png';
 import { motion } from 'framer-motion';
+import { LanguageSelector } from './LanguageSelector';
 
 export function Navbar() {
   const { isConnected, address, username, connecting, connectWallet, disconnectWallet, hasBasicAccess, hasDevAccess } = useWallet();
+  const { t } = useTranslation();
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -23,19 +26,22 @@ export function Navbar() {
           <img src={ohlLogo} alt="OHL Logo" className="w-10 h-10" />
           <div className="flex flex-col">
             <span className="font-display text-lg font-bold text-primary neon-text">OHL-Oracle</span>
-            <span className="text-[10px] text-muted-foreground tracking-widest uppercase">Over Hippo Lab</span>
+            <span className="text-[10px] text-muted-foreground tracking-widest uppercase">O'HippoLab</span>
           </div>
         </div>
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6">
-          <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">Features</a>
-          <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</a>
-          <a href="#oracle" className="text-sm text-muted-foreground hover:text-primary transition-colors">Oracle</a>
+          <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.features')}</a>
+          <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.pricing')}</a>
+          <a href="#oracle" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t('nav.oracle')}</a>
         </div>
 
         {/* Wallet Connection */}
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <LanguageSelector />
+
           {isConnected ? (
             <>
               {/* Access Badges */}
@@ -60,7 +66,7 @@ export function Navbar() {
                 </span>
               </div>
 
-              <Button variant="ghost" size="icon" onClick={disconnectWallet}>
+              <Button variant="ghost" size="icon" onClick={disconnectWallet} title={t('nav.disconnect')}>
                 <LogOut className="w-4 h-4" />
               </Button>
             </>
@@ -71,7 +77,7 @@ export function Navbar() {
               disabled={connecting}
             >
               <Wallet className="w-4 h-4" />
-              {connecting ? 'Connecting...' : 'Connect Wallet'}
+              {connecting ? t('nav.connecting') : t('nav.connectWallet')}
             </Button>
           )}
         </div>
