@@ -1,15 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { ethers } from 'ethers';
-
-// OverProtocol Chain Config
-const OVER_PROTOCOL = {
-  chainId: 54176,
-  chainIdHex: '0xD3A0',
-  name: 'OverProtocol',
-  rpcUrl: 'https://rpc.overprotocol.com',
-  symbol: 'OVER',
-  explorer: 'https://explorer.overprotocol.com',
-};
+import { OVER_PROTOCOL, DevTierType } from '@/lib/constants';
 
 interface WalletContextType {
   isConnected: boolean;
@@ -17,6 +8,8 @@ interface WalletContextType {
   username: string | null;
   hasBasicAccess: boolean;
   hasDevAccess: boolean;
+  devTier: DevTierType;
+  devExpiresAt: Date | null;
   balance: string;
   connecting: boolean;
   connectWallet: () => Promise<void>;
@@ -24,6 +17,7 @@ interface WalletContextType {
   setUsername: (name: string) => void;
   setBasicAccess: (access: boolean) => void;
   setDevAccess: (access: boolean) => void;
+  setDevTier: (tier: DevTierType, expiresAt: Date | null) => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -34,6 +28,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [username, setUsernameState] = useState<string | null>(null);
   const [hasBasicAccess, setBasicAccess] = useState(false);
   const [hasDevAccess, setDevAccess] = useState(false);
+  const [devTier, setDevTierState] = useState<DevTierType>('none');
+  const [devExpiresAt, setDevExpiresAt] = useState<Date | null>(null);
   const [balance, setBalance] = useState('0');
   const [connecting, setConnecting] = useState(false);
 
@@ -98,11 +94,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setUsernameState(null);
     setBasicAccess(false);
     setDevAccess(false);
+    setDevTierState('none');
+    setDevExpiresAt(null);
     setBalance('0');
   }, []);
 
   const setUsername = useCallback((name: string) => {
     setUsernameState(name);
+  }, []);
+
+  const setDevTier = useCallback((tier: DevTierType, expiresAt: Date | null) => {
+    setDevTierState(tier);
+    setDevExpiresAt(expiresAt);
+    setDevAccess(tier !== 'none');
   }, []);
 
   return (
@@ -113,6 +117,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         username,
         hasBasicAccess,
         hasDevAccess,
+        devTier,
+        devExpiresAt,
         balance,
         connecting,
         connectWallet,
@@ -120,6 +126,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setUsername,
         setBasicAccess,
         setDevAccess,
+        setDevTier,
       }}
     >
       {children}
