@@ -1,9 +1,7 @@
 import { motion } from 'framer-motion';
 import ohlLogo from '@/assets/ohl-logo.png';
-
 export function Footer() {
-  return (
-    <footer className="py-12 border-t border-border relative">
+  return <footer className="py-12 border-t border-border relative">
       <div className="absolute inset-0 cyber-grid opacity-10" />
       
       <div className="container mx-auto px-4 relative z-10">
@@ -47,9 +45,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">
-            © 2024 Over Hippo Lab. All rights reserved.
-          </p>
+          <p className="text-xs text-muted-foreground">© 2026 Over Hippo Lab. All rights reserved.</p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span>Chain ID: 54176</span>
             <span>•</span>
@@ -57,6 +53,5 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
