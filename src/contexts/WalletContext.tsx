@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { ethers } from 'ethers';
 import { OVER_PROTOCOL, DevTierType } from '@/lib/constants';
+import { useSupabaseProfile } from '@/hooks/useSupabaseProfile';
 
 interface WalletContextType {
   isConnected: boolean;
@@ -32,6 +33,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [devExpiresAt, setDevExpiresAt] = useState<Date | null>(null);
   const [balance, setBalance] = useState('0');
   const [connecting, setConnecting] = useState(false);
+  const { getOrCreateProfile, updateUsername: updateProfileUsername } = useSupabaseProfile();
+
+  // Load profile from Supabase when address changes
+  const loadProfile = useCallback(async (walletAddress: string) => {
+    const profile = await getOrCreateProfile(walletAddress);
+    if (profile) {
+      setUsernameState(profile.username);
+      setBasicAccess(profile.has_basic_access);
+      setDevTierState(profile.dev_tier as DevTierType);
+      setDevExpiresAt(profile.dev_expires_at ? new Date(profile.dev_expires_at) : null);
+      setDevAccess(profile.dev_tier !== 'none');
+    }
+  }, [getOrCreateProfile]);
 
   const connectWallet = useCallback(async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -79,6 +93,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           }
         }
         
+        // Load profile from Supabase
+        await loadProfile(userAddress);
+        
         setIsConnected(true);
       }
     } catch (error) {
@@ -86,7 +103,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setConnecting(false);
     }
-  }, []);
+  }, [loadProfile]);
 
   const disconnectWallet = useCallback(() => {
     setIsConnected(false);
@@ -99,9 +116,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setBalance('0');
   }, []);
 
-  const setUsername = useCallback((name: string) => {
+  const setUsername = useCallback(async (name: string) => {
     setUsernameState(name);
-  }, []);
+    if (address) {
+      await updateProfileUsername(address, name);
+    }
+  }, [address, updateProfileUsername]);
 
   const setDevTier = useCallback((tier: DevTierType, expiresAt: Date | null) => {
     setDevTierState(tier);
