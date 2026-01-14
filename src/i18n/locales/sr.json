@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "Funkcije",
+    "pricing": "Cene",
+    "oracle": "Oracle",
+    "connectWallet": "Poveži Novčanik",
+    "connecting": "Povezivanje...",
+    "disconnect": "Prekini vezu"
+  },
+  "hero": {
+    "title": "Web3 Developer Zajednica",
+    "subtitle": "Pokreće OHL Oracle",
+    "cta": "Započni"
+  },
+  "chat": {
+    "title": "Overworld Chat",
+    "placeholder": "Upiši svoju poruku...",
+    "oraclePlaceholder": "Postavi Orakulu pitanje...",
+    "oracleMode": "Oracle Mod",
+    "connectToChat": "Poveži novčanik da se pridružiš chatu",
+    "send": "Pošalji"
+  },
+  "pricing": {
+    "title": "Odaberi Nivo Pristupa",
+    "subtitle": "Počni besplatno, nadogradi kada ti treba više snage",
+    "free": "Besplatno",
+    "freeDesc": "Poveži se i Istraži",
+    "basic": "Basic Oracle",
+    "basicDesc": "Osnovni AI Pristup",
+    "dev": "DEV Mod",
+    "devDesc": "Pro Developer Alati",
+    "subscribe": "Pretplati se",
+    "lifetime": "Doživotni pristup",
+    "oneTime": "Jednokratna uplata",
+    "selected": "Odabrano",
+    "currentPlan": "Trenutni Plan",
+    "bestValue": "NAJBOLJA VREDNOST",
+    "features": {
+      "connectWallet": "Poveži novčanik",
+      "viewChat": "Pregledaj javni chat",
+      "basicProfile": "Osnovni profil",
+      "everything": "Sve iz Besplatnog",
+      "aiAssistant": "AI Oracle asistent",
+      "unlimitedQuestions": "Neograničena pitanja",
+      "priorityResponses": "Prioritetni odgovori",
+      "everythingBasic": "Sve iz Basic-a",
+      "advancedAi": "Napredni AI asistent",
+      "codeReview": "Pregled koda i debugging",
+      "liquidityRewards": "Nagrade za rudarenje likvidnosti",
+      "lpGrowth": "Rast LP pozicije",
+      "governance": "Glasanje o upravljanju"
+    },
+    "token": {
+      "title": "Token Platforme",
+      "maxSupply": "Maksimalna Ponuda",
+      "network": "Mreža"
+    }
+  },
+  "features": {
+    "title": "Funkcije Platforme",
+    "subtitle": "Sve što ti treba za gradnju na OverProtocol-u"
+  },
+  "token": {
+    "specs": "Specifikacije Tokena",
+    "name": "Naziv Tokena",
+    "symbol": "Simbol",
+    "decimals": "Decimale",
+    "maxSupply": "Maksimalna Ponuda",
+    "blockchain": "Blockchain",
+    "chainId": "Chain ID",
+    "rpcUrl": "RPC URL"
+  },
+  "code": {
+    "copy": "Kopiraj",
+    "copied": "Kopirano!",
+    "tip": "Kopiraj ovaj kod i zalepi ga u Remix IDE. Koristi Solidity kompajler verziju 0.8.20 ili noviju."
+  },
+  "common": {
+    "loading": "Učitavanje...",
+    "error": "Greška",
+    "success": "Uspeh",
+    "cancel": "Otkaži",
+    "confirm": "Potvrdi"
+  }
+}

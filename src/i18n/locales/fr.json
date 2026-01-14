@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "oracle": "Oracle",
+    "connectWallet": "Connecter Portefeuille",
+    "connecting": "Connexion...",
+    "disconnect": "Déconnecter"
+  },
+  "hero": {
+    "title": "Communauté de Développeurs Web3",
+    "subtitle": "Propulsé par OHL Oracle",
+    "cta": "Commencer"
+  },
+  "chat": {
+    "title": "Chat Overworld",
+    "placeholder": "Tapez votre message...",
+    "oraclePlaceholder": "Posez une question à l'Oracle...",
+    "oracleMode": "Mode Oracle",
+    "connectToChat": "Connectez votre portefeuille pour rejoindre le chat",
+    "send": "Envoyer"
+  },
+  "pricing": {
+    "title": "Choisissez votre Niveau d'Accès",
+    "subtitle": "Commencez gratuitement, passez à la vitesse supérieure quand vous avez besoin de plus",
+    "free": "Gratuit",
+    "freeDesc": "Connecter et Explorer",
+    "basic": "Oracle Basique",
+    "basicDesc": "Accès AI Essentiel",
+    "dev": "Mode DEV",
+    "devDesc": "Outils Pro Développeur",
+    "subscribe": "S'abonner",
+    "lifetime": "Accès à vie",
+    "oneTime": "Paiement unique",
+    "selected": "Sélectionné",
+    "currentPlan": "Plan Actuel",
+    "bestValue": "MEILLEUR RAPPORT",
+    "features": {
+      "connectWallet": "Connecter portefeuille",
+      "viewChat": "Voir le chat public",
+      "basicProfile": "Profil de base",
+      "everything": "Tout du Gratuit",
+      "aiAssistant": "Assistant AI Oracle",
+      "unlimitedQuestions": "Questions illimitées",
+      "priorityResponses": "Réponses prioritaires",
+      "everythingBasic": "Tout du Basique",
+      "advancedAi": "Assistant AI avancé",
+      "codeReview": "Revue de code et débogage",
+      "liquidityRewards": "Récompenses de minage de liquidité",
+      "lpGrowth": "Croissance de position LP",
+      "governance": "Vote de gouvernance"
+    },
+    "token": {
+      "title": "Token de Plateforme",
+      "maxSupply": "Offre Maximum",
+      "network": "Réseau"
+    }
+  },
+  "features": {
+    "title": "Fonctionnalités de la Plateforme",
+    "subtitle": "Tout ce dont vous avez besoin pour construire sur OverProtocol"
+  },
+  "token": {
+    "specs": "Spécifications du Token",
+    "name": "Nom du Token",
+    "symbol": "Symbole",
+    "decimals": "Décimales",
+    "maxSupply": "Offre Maximum",
+    "blockchain": "Blockchain",
+    "chainId": "Chain ID",
+    "rpcUrl": "URL RPC"
+  },
+  "code": {
+    "copy": "Copier",
+    "copied": "Copié !",
+    "tip": "Copiez ce code et collez-le dans Remix IDE. Utilisez la version 0.8.20 du compilateur Solidity ou plus récente."
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "Функции",
+    "pricing": "Цены",
+    "oracle": "Оракул",
+    "connectWallet": "Подключить кошелек",
+    "connecting": "Подключение...",
+    "disconnect": "Отключить"
+  },
+  "hero": {
+    "title": "Web3 Сообщество разработчиков",
+    "subtitle": "Работает на OHL Oracle",
+    "cta": "Начать"
+  },
+  "chat": {
+    "title": "Overworld Чат",
+    "placeholder": "Введите сообщение...",
+    "oraclePlaceholder": "Задайте Оракулу вопрос...",
+    "oracleMode": "Режим Оракула",
+    "connectToChat": "Подключите кошелек чтобы присоединиться к чату",
+    "send": "Отправить"
+  },
+  "pricing": {
+    "title": "Выберите уровень доступа",
+    "subtitle": "Начните бесплатно, обновите когда нужно больше возможностей",
+    "free": "Бесплатно",
+    "freeDesc": "Подключение и исследование",
+    "basic": "Basic Oracle",
+    "basicDesc": "Базовый AI доступ",
+    "dev": "DEV Режим",
+    "devDesc": "Pro инструменты разработчика",
+    "subscribe": "Подписаться",
+    "lifetime": "Пожизненный доступ",
+    "oneTime": "Единоразовый платеж",
+    "selected": "Выбрано",
+    "currentPlan": "Текущий план",
+    "bestValue": "ЛУЧШЕЕ ПРЕДЛОЖЕНИЕ",
+    "features": {
+      "connectWallet": "Подключить кошелек",
+      "viewChat": "Просмотр публичного чата",
+      "basicProfile": "Базовый профиль",
+      "everything": "Все из Бесплатного",
+      "aiAssistant": "AI Oracle ассистент",
+      "unlimitedQuestions": "Неограниченные вопросы",
+      "priorityResponses": "Приоритетные ответы",
+      "everythingBasic": "Все из Basic",
+      "advancedAi": "Продвинутый AI ассистент",
+      "codeReview": "Ревью кода и отладка",
+      "liquidityRewards": "Награды за майнинг ликвидности",
+      "lpGrowth": "Рост LP позиции",
+      "governance": "Голосование в управлении"
+    },
+    "token": {
+      "title": "Токен платформы",
+      "maxSupply": "Максимальное предложение",
+      "network": "Сеть"
+    }
+  },
+  "features": {
+    "title": "Функции платформы",
+    "subtitle": "Все необходимое для разработки на OverProtocol"
+  },
+  "token": {
+    "specs": "Характеристики токена",
+    "name": "Название токена",
+    "symbol": "Символ",
+    "decimals": "Десятичные",
+    "maxSupply": "Максимальное предложение",
+    "blockchain": "Блокчейн",
+    "chainId": "Chain ID",
+    "rpcUrl": "RPC URL"
+  },
+  "code": {
+    "copy": "Копировать",
+    "copied": "Скопировано!",
+    "tip": "Скопируйте этот код и вставьте в Remix IDE. Используйте Solidity компилятор версии 0.8.20 или новее."
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить"
+  }
+}

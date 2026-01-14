@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "功能",
+    "pricing": "定价",
+    "oracle": "预言机",
+    "connectWallet": "连接钱包",
+    "connecting": "连接中...",
+    "disconnect": "断开连接"
+  },
+  "hero": {
+    "title": "Web3 开发者社区",
+    "subtitle": "由 OHL Oracle 驱动",
+    "cta": "开始使用"
+  },
+  "chat": {
+    "title": "Overworld 聊天",
+    "placeholder": "输入您的消息...",
+    "oraclePlaceholder": "向预言机提问...",
+    "oracleMode": "预言机模式",
+    "connectToChat": "连接钱包加入聊天",
+    "send": "发送"
+  },
+  "pricing": {
+    "title": "选择您的访问级别",
+    "subtitle": "免费开始，需要更多功能时升级",
+    "free": "免费",
+    "freeDesc": "连接与探索",
+    "basic": "基础预言机",
+    "basicDesc": "基本AI访问",
+    "dev": "开发者模式",
+    "devDesc": "专业开发工具",
+    "subscribe": "立即订阅",
+    "lifetime": "终身访问",
+    "oneTime": "一次性付款",
+    "selected": "已选择",
+    "currentPlan": "当前计划",
+    "bestValue": "最佳价值",
+    "features": {
+      "connectWallet": "连接钱包",
+      "viewChat": "查看公共聊天",
+      "basicProfile": "基本资料",
+      "everything": "免费版所有功能",
+      "aiAssistant": "AI预言机助手",
+      "unlimitedQuestions": "无限提问",
+      "priorityResponses": "优先响应",
+      "everythingBasic": "基础版所有功能",
+      "advancedAi": "高级AI助手",
+      "codeReview": "代码审查与调试",
+      "liquidityRewards": "流动性挖矿奖励",
+      "lpGrowth": "LP仓位增长",
+      "governance": "治理投票"
+    },
+    "token": {
+      "title": "平台代币",
+      "maxSupply": "最大供应量",
+      "network": "网络"
+    }
+  },
+  "features": {
+    "title": "平台功能",
+    "subtitle": "在 OverProtocol 上构建所需的一切"
+  },
+  "token": {
+    "specs": "代币规格",
+    "name": "代币名称",
+    "symbol": "符号",
+    "decimals": "小数位",
+    "maxSupply": "最大供应量",
+    "blockchain": "区块链",
+    "chainId": "链ID",
+    "rpcUrl": "RPC地址"
+  },
+  "code": {
+    "copy": "复制",
+    "copied": "已复制！",
+    "tip": "复制此代码并粘贴到 Remix IDE 中。使用 Solidity 编译器版本 0.8.20 或更新版本。"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认"
+  }
+}

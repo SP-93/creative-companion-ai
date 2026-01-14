@@ -11,15 +11,15 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title OverHippo.Lab Token (OH.L)
+ * @title O'HippoLab Token (OHL)
  * @dev ERC-20 token for OHL-Oracle platform
- * @notice Max supply: 250,000,000 OH.L
+ * @notice Max supply: 250,000,000 OHL
  * @notice Deployed on OverProtocol (Chain ID: 54176)
  */
-contract OverHippoLabToken is ERC20, ERC20Burnable, Ownable {
+contract OHippoLabToken is ERC20, ERC20Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 250_000_000 * 10**18;
     
-    constructor() ERC20("OverHippo.Lab", "OH.L") Ownable(msg.sender) {
+    constructor() ERC20("O'HippoLab", "OHL") Ownable(msg.sender) {
         // Mint entire supply to deployer (admin) wallet
         _mint(msg.sender, MAX_SUPPLY);
     }
@@ -61,7 +61,7 @@ const SolidityCodeBlock = () => {
           <Code2 className="w-5 h-5 text-primary" />
           <div>
             <h3 className="font-orbitron font-semibold text-foreground">
-              OverHippoLabToken.sol
+              OHippoLabToken.sol
             </h3>
             <p className="text-xs text-muted-foreground">Solidity ^0.8.20</p>
           </div>

@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "features": "기능",
+    "pricing": "가격",
+    "oracle": "오라클",
+    "connectWallet": "지갑 연결",
+    "connecting": "연결 중...",
+    "disconnect": "연결 해제"
+  },
+  "hero": {
+    "title": "Web3 개발자 커뮤니티",
+    "subtitle": "OHL Oracle 기반",
+    "cta": "시작하기"
+  },
+  "chat": {
+    "title": "Overworld 채팅",
+    "placeholder": "메시지를 입력하세요...",
+    "oraclePlaceholder": "오라클에게 질문하세요...",
+    "oracleMode": "오라클 모드",
+    "connectToChat": "채팅에 참여하려면 지갑을 연결하세요",
+    "send": "보내기"
+  },
+  "pricing": {
+    "title": "액세스 레벨 선택",
+    "subtitle": "무료로 시작하고 더 많은 기능이 필요할 때 업그레이드",
+    "free": "무료",
+    "freeDesc": "연결 및 탐색",
+    "basic": "베이직 오라클",
+    "basicDesc": "기본 AI 액세스",
+    "dev": "개발자 모드",
+    "devDesc": "프로 개발 도구",
+    "subscribe": "지금 구독",
+    "lifetime": "평생 액세스",
+    "oneTime": "일회성 결제",
+    "selected": "선택됨",
+    "currentPlan": "현재 플랜",
+    "bestValue": "최고 가치",
+    "features": {
+      "connectWallet": "지갑 연결",
+      "viewChat": "공개 채팅 보기",
+      "basicProfile": "기본 프로필",
+      "everything": "무료의 모든 기능",
+      "aiAssistant": "AI 오라클 어시스턴트",
+      "unlimitedQuestions": "무제한 질문",
+      "priorityResponses": "우선 응답",
+      "everythingBasic": "베이직의 모든 기능",
+      "advancedAi": "고급 AI 어시스턴트",
+      "codeReview": "코드 리뷰 및 디버깅",
+      "liquidityRewards": "유동성 마이닝 보상",
+      "lpGrowth": "LP 포지션 성장",
+      "governance": "거버넌스 투표"
+    },
+    "token": {
+      "title": "플랫폼 토큰",
+      "maxSupply": "최대 공급량",
+      "network": "네트워크"
+    }
+  },
+  "features": {
+    "title": "플랫폼 기능",
+    "subtitle": "OverProtocol에서 구축하는 데 필요한 모든 것"
+  },
+  "token": {
+    "specs": "토큰 사양",
+    "name": "토큰 이름",
+    "symbol": "심볼",
+    "decimals": "소수점",
+    "maxSupply": "최대 공급량",
+    "blockchain": "블록체인",
+    "chainId": "체인 ID",
+    "rpcUrl": "RPC URL"
+  },
+  "code": {
+    "copy": "복사",
+    "copied": "복사됨!",
+    "tip": "이 코드를 복사하여 Remix IDE에 붙여넣으세요. Solidity 컴파일러 버전 0.8.20 이상을 사용하세요."
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "cancel": "취소",
+    "confirm": "확인"
+  }
+}
