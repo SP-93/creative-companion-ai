@@ -1,0 +1,10 @@
+project_id = "bznqnuhljvtcvnjdmpbh"
+
+[functions.verify-payment]
+verify_jwt = false
+
+[functions.admin-actions]
+verify_jwt = false
+
+[functions.oracle-response]
+verify_jwt = false

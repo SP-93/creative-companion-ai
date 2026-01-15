@@ -6,16 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ADMIN_WALLET } from '@/lib/constants';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ADMIN_WALLET, TOKEN_INFO, OVER_PROTOCOL } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
-import { Shield, Users, CreditCard, TrendingUp, AlertTriangle, Loader2 } from 'lucide-react';
+import { useTokenContract } from '@/hooks/useTokenContract';
+import { Shield, Users, CreditCard, TrendingUp, AlertTriangle, Loader2, Coins, Flame, RefreshCw, ExternalLink } from 'lucide-react';
 import type { Profile, Payment } from '@/types/database';
+import { toast } from 'sonner';
 
 function AdminContent() {
   const { isConnected, address, connecting } = useWallet();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  const { 
+    tokenInfo, 
+    loading: tokenLoading, 
+    contractAddress, 
+    setContractAddress, 
+    loadTokenInfo,
+    mint,
+    burn,
+  } = useTokenContract();
+  
+  const [newContractAddress, setNewContractAddress] = useState('');
+  const [mintAddress, setMintAddress] = useState('');
+  const [mintAmount, setMintAmount] = useState('');
+  const [burnAmount, setBurnAmount] = useState('');
+  const [mintLoading, setMintLoading] = useState(false);
+  const [burnLoading, setBurnLoading] = useState(false);
+  
   const [stats, setStats] = useState({
     totalUsers: 0,
     basicUsers: 0,
@@ -34,45 +57,17 @@ function AdminContent() {
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      // Load all profiles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data: profilesData } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      const { data: paymentsData } = await supabase.from('payments').select('*').order('created_at', { ascending: false });
 
-      if (profilesError) {
-        console.error('Error loading profiles:', profilesError);
-      } else {
-        setProfiles(profilesData || []);
-        
-        // Calculate stats
-        const basic = profilesData?.filter(p => p.has_basic_access).length || 0;
-        const dev = profilesData?.filter(p => p.dev_tier !== 'none').length || 0;
-        setStats(prev => ({
-          ...prev,
-          totalUsers: profilesData?.length || 0,
-          basicUsers: basic,
-          devUsers: dev,
-        }));
-      }
+      setProfiles(profilesData || []);
+      setPayments(paymentsData || []);
 
-      // Load all payments
-      const { data: paymentsData, error: paymentsError } = await supabase
-        .from('payments')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const basic = profilesData?.filter(p => p.has_basic_access).length || 0;
+      const dev = profilesData?.filter(p => p.dev_tier !== 'none').length || 0;
+      const revenue = paymentsData?.filter(p => p.status === 'confirmed').reduce((sum, p) => sum + (p.amount_usd || 0), 0) || 0;
 
-      if (paymentsError) {
-        console.error('Error loading payments:', paymentsError);
-      } else {
-        setPayments(paymentsData || []);
-        
-        // Calculate total revenue
-        const revenue = paymentsData
-          ?.filter(p => p.status === 'confirmed')
-          .reduce((sum, p) => sum + (p.amount_usd || 0), 0) || 0;
-        setStats(prev => ({ ...prev, totalRevenue: revenue }));
-      }
+      setStats({ totalUsers: profilesData?.length || 0, basicUsers: basic, devUsers: dev, totalRevenue: revenue });
     } catch (error) {
       console.error('Failed to load admin data:', error);
     } finally {
@@ -80,242 +75,202 @@ function AdminContent() {
     }
   };
 
-  // Loading state
+  const handleSetContract = () => {
+    if (newContractAddress?.startsWith('0x')) {
+      setContractAddress(newContractAddress);
+      toast.success('Contract address saved');
+      setNewContractAddress('');
+    } else {
+      toast.error('Invalid contract address');
+    }
+  };
+
+  const handleMint = async () => {
+    if (!mintAddress || !mintAmount) return toast.error('Enter address and amount');
+    setMintLoading(true);
+    try {
+      const txHash = await mint(mintAddress, mintAmount);
+      toast.success(`Minted ${mintAmount} ${TOKEN_INFO.symbol}`);
+      setMintAddress(''); setMintAmount(''); loadTokenInfo();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Mint failed');
+    } finally { setMintLoading(false); }
+  };
+
+  const handleBurn = async () => {
+    if (!burnAmount) return toast.error('Enter amount');
+    setBurnLoading(true);
+    try {
+      await burn(burnAmount);
+      toast.success(`Burned ${burnAmount} ${TOKEN_INFO.symbol}`);
+      setBurnAmount(''); loadTokenInfo();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Burn failed');
+    } finally { setBurnLoading(false); }
+  };
+
   if (connecting) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-        <Footer />
-      </div>
+      <div className="min-h-screen bg-background"><Navbar /><div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div><Footer /></div>
     );
   }
 
-  // Not connected
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-          <AlertTriangle className="w-16 h-16 text-yellow-500" />
-          <h1 className="text-2xl font-bold text-foreground">Connect Wallet</h1>
-          <p className="text-muted-foreground">Please connect your wallet to access admin panel</p>
-        </div>
-        <Footer />
-      </div>
+      <div className="min-h-screen bg-background"><Navbar /><div className="flex flex-col items-center justify-center min-h-[60vh] gap-4"><AlertTriangle className="w-16 h-16 text-yellow-500" /><h1 className="text-2xl font-bold">Connect Wallet</h1></div><Footer /></div>
     );
   }
 
-  // Not admin
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-          <Shield className="w-16 h-16 text-destructive" />
-          <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access this page</p>
-          <p className="text-xs text-muted-foreground">
-            Connected: {address?.slice(0, 10)}...{address?.slice(-8)}
-          </p>
-        </div>
-        <Footer />
-      </div>
+      <div className="min-h-screen bg-background"><Navbar /><div className="flex flex-col items-center justify-center min-h-[60vh] gap-4"><Shield className="w-16 h-16 text-destructive" /><h1 className="text-2xl font-bold">Access Denied</h1></div><Footer /></div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Shield className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.totalUsers}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Basic Oracle</CardTitle>
-              <Shield className="w-4 h-4 text-neon-green" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.basicUsers}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">DEV Users</CardTitle>
-              <CreditCard className="w-4 h-4 text-neon-blue" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">{stats.devUsers}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-              <TrendingUp className="w-4 h-4 text-neon-pink" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">${stats.totalRevenue.toFixed(2)}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Users Table */}
-        <Card className="bg-card border-border mb-8">
-          <CardHeader>
-            <CardTitle className="text-foreground">Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : profiles.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No users yet</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Wallet</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Basic Access</TableHead>
-                    <TableHead>DEV Tier</TableHead>
-                    <TableHead>Expires</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {profiles.map((profile) => (
-                    <TableRow key={profile.id}>
-                      <TableCell className="font-mono text-xs">
-                        {profile.wallet_address.slice(0, 10)}...{profile.wallet_address.slice(-8)}
-                      </TableCell>
-                      <TableCell>{profile.username || '-'}</TableCell>
-                      <TableCell>
-                        {profile.has_basic_access ? (
-                          <Badge variant="default" className="bg-neon-green/20 text-neon-green">Active</Badge>
-                        ) : (
-                          <Badge variant="secondary">No</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {profile.dev_tier !== 'none' ? (
-                          <Badge variant="default" className="bg-neon-blue/20 text-neon-blue capitalize">
-                            {profile.dev_tier}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">None</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {profile.dev_expires_at 
-                          ? new Date(profile.dev_expires_at).toLocaleDateString() 
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(profile.created_at).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Payments Table */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-foreground">Payments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : payments.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No payments yet</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>TX Hash</TableHead>
-                    <TableHead>Wallet</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-mono text-xs">
-                        {payment.tx_hash.slice(0, 10)}...{payment.tx_hash.slice(-8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {payment.wallet_address.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell className="capitalize">{payment.payment_type}</TableCell>
-                      <TableCell>${payment.amount_usd.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={payment.status === 'confirmed' ? 'default' : 'secondary'}
-                          className={payment.status === 'confirmed' ? 'bg-neon-green/20 text-neon-green' : ''}
-                        >
-                          {payment.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(payment.created_at).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Refresh Button */}
-        <div className="flex justify-center mt-8">
-          <Button onClick={loadAdminData} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Refresh Data
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          </div>
+          <Button onClick={loadAdminData} disabled={loading} variant="outline" size="sm">
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />Refresh
           </Button>
         </div>
-      </main>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="token">Token Mint</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total Users</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.totalUsers}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Basic Oracle</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.basicUsers}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">DEV Users</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.devUsers}</div></CardContent></Card>
+              <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Revenue</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div></CardContent></Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader><CardTitle>Users ({profiles.length})</CardTitle></CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow><TableHead>Wallet</TableHead><TableHead>Username</TableHead><TableHead>Basic</TableHead><TableHead>DEV</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {profiles.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-mono text-xs">{p.wallet_address.slice(0, 10)}...</TableCell>
+                        <TableCell>{p.username || '-'}</TableCell>
+                        <TableCell>{p.has_basic_access ? <Badge className="bg-neon-green/20 text-neon-green">Yes</Badge> : '-'}</TableCell>
+                        <TableCell>{p.dev_tier !== 'none' ? <Badge className="bg-neon-blue/20 text-neon-blue capitalize">{p.dev_tier}</Badge> : '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <Card>
+              <CardHeader><CardTitle>Payments ({payments.length})</CardTitle></CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow><TableHead>TX</TableHead><TableHead>Type</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {payments.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-mono text-xs">{p.tx_hash.slice(0, 10)}...</TableCell>
+                        <TableCell className="capitalize">{p.payment_type}</TableCell>
+                        <TableCell>${p.amount_usd.toFixed(2)}</TableCell>
+                        <TableCell><Badge className={p.status === 'confirmed' ? 'bg-neon-green/20 text-neon-green' : ''}>{p.status}</Badge></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="token">
+            <div className="grid gap-6">
+              {/* Contract Setup */}
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Coins className="w-5 h-5" /> Token Contract</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {contractAddress ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Contract Address:</p>
+                      <div className="flex items-center gap-2">
+                        <code className="bg-background px-2 py-1 rounded text-xs flex-1">{contractAddress}</code>
+                        <a href={`${OVER_PROTOCOL.explorer}/address/${contractAddress}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" /></a>
+                      </div>
+                      {tokenInfo && (
+                        <div className="grid grid-cols-2 gap-4 mt-4 p-4 bg-background rounded-lg">
+                          <div><p className="text-xs text-muted-foreground">Total Supply</p><p className="font-bold">{Number(tokenInfo.totalSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
+                          <div><p className="text-xs text-muted-foreground">Max Supply</p><p className="font-bold">{Number(tokenInfo.maxSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
+                        </div>
+                      )}
+                      <Button onClick={loadTokenInfo} disabled={tokenLoading} variant="outline" size="sm" className="mt-2">
+                        {tokenLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Refresh Info'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input placeholder="0x... contract address" value={newContractAddress} onChange={(e) => setNewContractAddress(e.target.value)} />
+                      <Button onClick={handleSetContract}>Set Contract</Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Mint */}
+              {contractAddress && (
+                <Card>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Coins className="w-5 h-5 text-neon-green" /> Mint Tokens</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <Input placeholder="Recipient address (0x...)" value={mintAddress} onChange={(e) => setMintAddress(e.target.value)} />
+                    <Input placeholder="Amount" type="number" value={mintAmount} onChange={(e) => setMintAmount(e.target.value)} />
+                    <Button onClick={handleMint} disabled={mintLoading} className="w-full bg-neon-green/20 text-neon-green hover:bg-neon-green/30">
+                      {mintLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Coins className="w-4 h-4 mr-2" />}Mint
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Burn */}
+              {contractAddress && (
+                <Card>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Flame className="w-5 h-5 text-destructive" /> Burn Tokens</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    <Input placeholder="Amount to burn" type="number" value={burnAmount} onChange={(e) => setBurnAmount(e.target.value)} />
+                    <Button onClick={handleBurn} disabled={burnLoading} variant="destructive" className="w-full">
+                      {burnLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Flame className="w-4 h-4 mr-2" />}Burn
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
       <Footer />
     </div>
   );
 }
 
-const Admin = () => {
-  return (
-    <WalletProvider>
-      <AdminContent />
-    </WalletProvider>
-  );
-};
+const Admin = () => (
+  <WalletProvider>
+    <AdminContent />
+  </WalletProvider>
+);
 
 export default Admin;
