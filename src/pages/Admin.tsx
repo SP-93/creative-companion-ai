@@ -3,7 +3,7 @@ import { WalletProvider, useWallet } from '@/contexts/WalletContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -11,9 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ADMIN_WALLET, TOKEN_INFO, OVER_PROTOCOL } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 import { useTokenContract } from '@/hooks/useTokenContract';
-import { Shield, Users, CreditCard, TrendingUp, AlertTriangle, Loader2, Coins, Flame, RefreshCw, ExternalLink } from 'lucide-react';
+import { useTokenDeploy, DeployStatus } from '@/hooks/useTokenDeploy';
+import { Shield, Users, CreditCard, TrendingUp, AlertTriangle, Loader2, Coins, Flame, RefreshCw, ExternalLink, Rocket, CheckCircle2, XCircle } from 'lucide-react';
 import type { Profile, Payment } from '@/types/database';
 import { toast } from 'sonner';
+import ohlTokenIcon from '@/assets/ohl-token-icon.png';
 
 function AdminContent() {
   const { isConnected, address, connecting } = useWallet();
@@ -31,6 +33,14 @@ function AdminContent() {
     mint,
     burn,
   } = useTokenContract();
+
+  const {
+    status: deployStatus,
+    error: deployError,
+    result: deployResult,
+    deployContract,
+    reset: resetDeploy,
+  } = useTokenDeploy();
   
   const [newContractAddress, setNewContractAddress] = useState('');
   const [mintAddress, setMintAddress] = useState('');
@@ -53,6 +63,13 @@ function AdminContent() {
       loadAdminData();
     }
   }, [isAdmin]);
+
+  // Auto-set contract address after successful deploy
+  useEffect(() => {
+    if (deployResult?.contractAddress) {
+      setContractAddress(deployResult.contractAddress);
+    }
+  }, [deployResult, setContractAddress]);
 
   const loadAdminData = async () => {
     setLoading(true);
@@ -85,6 +102,15 @@ function AdminContent() {
     }
   };
 
+  const handleDeploy = async () => {
+    try {
+      const result = await deployContract();
+      toast.success(`Token deployed at ${result.contractAddress.slice(0, 10)}...`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Deploy failed');
+    }
+  };
+
   const handleMint = async () => {
     if (!mintAddress || !mintAmount) return toast.error('Enter address and amount');
     setMintLoading(true);
@@ -109,6 +135,21 @@ function AdminContent() {
     } finally { setBurnLoading(false); }
   };
 
+  const getDeployStatusInfo = (status: DeployStatus) => {
+    switch (status) {
+      case 'connecting':
+        return { text: 'Connecting wallet...', color: 'text-yellow-500', icon: Loader2 };
+      case 'deploying':
+        return { text: 'Deploying contract...', color: 'text-blue-500', icon: Loader2 };
+      case 'success':
+        return { text: 'Deployed successfully!', color: 'text-green-500', icon: CheckCircle2 };
+      case 'error':
+        return { text: 'Deploy failed', color: 'text-red-500', icon: XCircle };
+      default:
+        return { text: 'Ready to deploy', color: 'text-muted-foreground', icon: Rocket };
+    }
+  };
+
   if (connecting) {
     return (
       <div className="min-h-screen bg-background"><Navbar /><div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div><Footer /></div>
@@ -126,6 +167,9 @@ function AdminContent() {
       <div className="min-h-screen bg-background"><Navbar /><div className="flex flex-col items-center justify-center min-h-[60vh] gap-4"><Shield className="w-16 h-16 text-destructive" /><h1 className="text-2xl font-bold">Access Denied</h1></div><Footer /></div>
     );
   }
+
+  const statusInfo = getDeployStatusInfo(deployStatus);
+  const StatusIcon = statusInfo.icon;
 
   return (
     <div className="min-h-screen bg-background">
@@ -202,35 +246,167 @@ function AdminContent() {
 
           <TabsContent value="token">
             <div className="grid gap-6">
-              {/* Contract Setup */}
-              <Card>
-                <CardHeader><CardTitle className="flex items-center gap-2"><Coins className="w-5 h-5" /> Token Contract</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  {contractAddress ? (
+              {/* Deploy Contract Card */}
+              {!contractAddress && (
+                <Card className="border-2 border-dashed border-primary/50">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <img src={ohlTokenIcon} alt="OHL Token" className="w-16 h-16 rounded-full" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Rocket className="w-5 h-5 text-primary" /> Deploy OHL Token
+                        </CardTitle>
+                        <CardDescription>
+                          Deploy the O'HippoLab token contract to OverProtocol
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Token Name</p>
+                        <p className="font-semibold">{TOKEN_INFO.name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Symbol</p>
+                        <p className="font-semibold">{TOKEN_INFO.symbol}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Max Supply</p>
+                        <p className="font-semibold">{TOKEN_INFO.maxSupply.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Network</p>
+                        <p className="font-semibold">{OVER_PROTOCOL.name}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                      <p className="text-sm text-yellow-500">
+                        All {TOKEN_INFO.maxSupply.toLocaleString()} tokens will be minted to your wallet. Make sure you have OVER for gas.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <StatusIcon className={`w-5 h-5 ${statusInfo.color} ${deployStatus === 'connecting' || deployStatus === 'deploying' ? 'animate-spin' : ''}`} />
+                      <span className={`text-sm ${statusInfo.color}`}>{statusInfo.text}</span>
+                    </div>
+
+                    {deployError && (
+                      <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                        <p className="text-sm text-destructive">{deployError}</p>
+                      </div>
+                    )}
+
+                    {deployResult && (
+                      <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
+                        <p className="text-sm text-green-500 font-semibold">🎉 Token deployed successfully!</p>
+                        <div className="flex items-center gap-2">
+                          <code className="text-xs bg-background px-2 py-1 rounded flex-1">{deployResult.contractAddress}</code>
+                          <a 
+                            href={`${OVER_PROTOCOL.explorer}/address/${deployResult.contractAddress}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-green-500 hover:text-green-400"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <Button 
+                        onClick={handleDeploy} 
+                        disabled={deployStatus === 'connecting' || deployStatus === 'deploying'}
+                        className="flex-1 bg-primary hover:bg-primary/80"
+                        size="lg"
+                      >
+                        {deployStatus === 'connecting' || deployStatus === 'deploying' ? (
+                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        ) : (
+                          <Rocket className="w-5 h-5 mr-2" />
+                        )}
+                        {deployStatus === 'idle' ? 'DEPLOY CONTRACT' : 
+                         deployStatus === 'connecting' ? 'Connecting...' : 
+                         deployStatus === 'deploying' ? 'Deploying...' : 
+                         deployStatus === 'success' ? 'Deployed!' : 'Try Again'}
+                      </Button>
+                      {deployStatus === 'error' && (
+                        <Button onClick={resetDeploy} variant="outline">
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-border">
+                      <p className="text-xs text-muted-foreground mb-2">Or enter existing contract address:</p>
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="0x... contract address" 
+                          value={newContractAddress} 
+                          onChange={(e) => setNewContractAddress(e.target.value)} 
+                        />
+                        <Button onClick={handleSetContract} variant="secondary">Set</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Contract Info */}
+              {contractAddress && (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <img src={ohlTokenIcon} alt="OHL Token" className="w-12 h-12 rounded-full" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Coins className="w-5 h-5" /> Token Contract
+                        </CardTitle>
+                        <CardDescription>OHL Token on OverProtocol</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Contract Address:</p>
                       <div className="flex items-center gap-2">
                         <code className="bg-background px-2 py-1 rounded text-xs flex-1">{contractAddress}</code>
-                        <a href={`${OVER_PROTOCOL.explorer}/address/${contractAddress}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" /></a>
+                        <a href={`${OVER_PROTOCOL.explorer}/address/${contractAddress}`} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
                       </div>
-                      {tokenInfo && (
-                        <div className="grid grid-cols-2 gap-4 mt-4 p-4 bg-background rounded-lg">
-                          <div><p className="text-xs text-muted-foreground">Total Supply</p><p className="font-bold">{Number(tokenInfo.totalSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
-                          <div><p className="text-xs text-muted-foreground">Max Supply</p><p className="font-bold">{Number(tokenInfo.maxSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
-                        </div>
-                      )}
-                      <Button onClick={loadTokenInfo} disabled={tokenLoading} variant="outline" size="sm" className="mt-2">
+                    </div>
+                    {tokenInfo && (
+                      <div className="grid grid-cols-2 gap-4 mt-4 p-4 bg-background rounded-lg">
+                        <div><p className="text-xs text-muted-foreground">Total Supply</p><p className="font-bold">{Number(tokenInfo.totalSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
+                        <div><p className="text-xs text-muted-foreground">Max Supply</p><p className="font-bold">{Number(tokenInfo.maxSupply).toLocaleString()} {tokenInfo.symbol}</p></div>
+                        <div><p className="text-xs text-muted-foreground">Owner</p><p className="font-mono text-xs">{tokenInfo.owner.slice(0, 10)}...</p></div>
+                        <div><p className="text-xs text-muted-foreground">Decimals</p><p className="font-bold">{tokenInfo.decimals}</p></div>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <Button onClick={loadTokenInfo} disabled={tokenLoading} variant="outline" size="sm">
                         {tokenLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Refresh Info'}
                       </Button>
+                      <Button 
+                        onClick={() => {
+                          localStorage.removeItem('ohl_token_contract_address');
+                          window.location.reload();
+                        }} 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        Clear Contract
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Input placeholder="0x... contract address" value={newContractAddress} onChange={(e) => setNewContractAddress(e.target.value)} />
-                      <Button onClick={handleSetContract}>Set Contract</Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Mint */}
               {contractAddress && (
