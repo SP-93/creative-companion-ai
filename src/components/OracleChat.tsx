@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
-import { useSupabaseChat } from '@/hooks/useSupabaseChat';
+import { useOracleChat } from '@/hooks/useOracleChat';
 import { Send, Bot, User, Lock, Sparkles, Loader2, Zap, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function OracleChat() {
   const { isConnected, username, address, hasBasicAccess, hasDevAccess, devTier, connectWallet } = useWallet();
-  const { messages, loading, sendMessage } = useSupabaseChat();
+  const { messages, loading, aiLoading, sendMessage } = useOracleChat(address);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -27,12 +27,8 @@ export function OracleChat() {
 
     setSending(true);
     try {
-      // Send user message
-      await sendMessage(newMessage, username || 'Anon', address, 'user');
-
-      // TODO: Trigger Oracle AI response via Edge Function
-      // The Edge Function will add the oracle response to the database
-      
+      // Send user message and trigger Oracle AI response
+      await sendMessage(newMessage, username || 'Anon');
       setNewMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -46,7 +42,7 @@ export function OracleChat() {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Show all messages including oracle responses
+  // All messages are now per-user oracle messages (filtered by hook)
   const oracleMessages = messages;
 
   const hasAccess = hasBasicAccess || hasDevAccess;
@@ -164,57 +160,75 @@ export function OracleChat() {
                   <div className="flex items-center justify-center h-full">
                     <Loader2 className="w-8 h-8 text-accent animate-spin" />
                   </div>
-                ) : oracleMessages.length === 0 ? (
+                ) : oracleMessages.length === 0 && !aiLoading ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                     <Bot className="w-12 h-12 mb-4 opacity-50" />
                     <p>Ask the Oracle anything!</p>
                     <p className="text-sm mt-2">Try: "How do I create a React component?"</p>
                   </div>
                 ) : (
-                  <AnimatePresence>
-                    {oracleMessages.map((message) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className={`flex items-start gap-3 ${
-                          message.message_type === 'oracle' ? 'bg-accent/5 p-4 rounded-xl' : ''
-                        }`}
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            message.message_type === 'oracle'
-                              ? 'bg-oracle-gradient'
-                              : 'bg-primary/20'
+                  <>
+                    <AnimatePresence>
+                      {oracleMessages.map((message) => (
+                        <motion.div
+                          key={message.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className={`flex items-start gap-3 ${
+                            message.message_type === 'oracle' ? 'bg-accent/5 p-4 rounded-xl' : ''
                           }`}
                         >
-                          {message.message_type === 'oracle' ? (
-                            <Sparkles className="w-4 h-4 text-foreground" />
-                          ) : (
-                            <User className="w-4 h-4 text-primary" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span
-                              className={`font-semibold text-sm ${
-                                message.message_type === 'oracle' ? 'text-accent' : 'text-primary'
-                              }`}
-                            >
-                              {message.message_type === 'oracle' ? 'Oracle AI' : message.username}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {formatTime(message.created_at)}
-                            </span>
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              message.message_type === 'oracle'
+                                ? 'bg-oracle-gradient'
+                                : 'bg-primary/20'
+                            }`}
+                          >
+                            {message.message_type === 'oracle' ? (
+                              <Sparkles className="w-4 h-4 text-foreground" />
+                            ) : (
+                              <User className="w-4 h-4 text-primary" />
+                            )}
                           </div>
-                          <p className="text-sm text-foreground break-words whitespace-pre-wrap">
-                            {message.content}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span
+                                className={`font-semibold text-sm ${
+                                  message.message_type === 'oracle' ? 'text-accent' : 'text-primary'
+                                }`}
+                              >
+                                {message.message_type === 'oracle' ? 'Oracle AI' : message.username}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatTime(message.created_at)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-foreground break-words whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    {/* AI Loading indicator */}
+                    {aiLoading && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-3 bg-accent/5 p-4 rounded-xl"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-oracle-gradient flex items-center justify-center flex-shrink-0">
+                          <Loader2 className="w-4 h-4 text-foreground animate-spin" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="font-semibold text-sm text-accent">Oracle AI</span>
+                          <p className="text-sm text-muted-foreground mt-1">Thinking...</p>
                         </div>
                       </motion.div>
-                    ))}
-                  </AnimatePresence>
+                    )}
+                  </>
                 )}
                 <div ref={messagesEndRef} />
               </div>

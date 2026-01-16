@@ -17,6 +17,17 @@
 
 ### Januar 2026
 
+#### 16. Januar 2026 (Update 2)
+- ✅ **Chat Separation:** Razdvojeni World Chat i Oracle AI u odvojene chat sobe
+- ✅ **Supabase Migration:** Dodata `chat_room` kolona (world/oracle) u `chat_messages`
+- ✅ **New Hooks Created:**
+  - `useWorldChat.ts` - Public chat (chat_room = 'world')
+  - `useOracleChat.ts` - Private per-user AI chat (chat_room = 'oracle')
+- ✅ **Oracle AI Integration:** Povezan sa Edge Function, AI loading state
+- ✅ **Navbar Cleanup:** Uklonjen dupli ADMIN badge
+- ✅ **CSS Fix:** @import premešten na početak za Vercel build
+- ✅ **Edge Function Updated:** `oracle-response` koristi chat_room = 'oracle'
+
 #### 16. Januar 2026
 - ✅ **Database Complete:** Kreirana `token_rewards` tabela
 - ✅ **RLS Policies:** Verifikovane i dodate na sve tabele (profiles, chat_messages, message_translations, payments, token_rewards)

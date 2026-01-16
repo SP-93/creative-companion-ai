@@ -15,6 +15,8 @@ export interface Profile {
   updated_at: string;
 }
 
+export type ChatRoom = 'world' | 'oracle';
+
 export interface ChatMessage {
   id: string;
   user_id: string | null;
@@ -23,6 +25,7 @@ export interface ChatMessage {
   content: string;
   source_lang: string;
   message_type: MessageType;
+  chat_room: ChatRoom;
   created_at: string;
 }
 

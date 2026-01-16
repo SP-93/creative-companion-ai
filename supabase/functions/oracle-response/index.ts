@@ -50,16 +50,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user has DEV access (required for AI responses)
+    // Check if user has Basic or DEV access (required for AI responses)
     const hasDevAccess = profile.dev_tier !== 'none' && 
       profile.dev_expires_at && 
       new Date(profile.dev_expires_at) > new Date();
+    
+    const hasBasicAccess = profile.has_basic_access;
 
-    if (!hasDevAccess) {
-      console.log('[oracle-response] User does not have DEV access');
+    if (!hasBasicAccess && !hasDevAccess) {
+      console.log('[oracle-response] User does not have access');
       return new Response(
         JSON.stringify({ 
-          error: 'DEV access required for AI Oracle responses',
+          error: 'Basic or DEV access required for AI Oracle responses',
           upgrade_required: true,
         }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -127,19 +129,15 @@ Respond in ${language} language if the user's message is in that language, other
 
     console.log('[oracle-response] Response generated successfully');
 
-    // Store the message and response in chat_messages
-    await supabase.from('chat_messages').insert([
-      {
-        wallet_address: wallet_address.toLowerCase(),
-        message,
-        is_oracle: false,
-      },
-      {
-        wallet_address: wallet_address.toLowerCase(),
-        message: oracleResponse,
-        is_oracle: true,
-      },
-    ]);
+    // Store ONLY the Oracle response in chat_messages (user message already saved by frontend)
+    await supabase.from('chat_messages').insert({
+      wallet_address: wallet_address.toLowerCase(),
+      username: 'Oracle AI',
+      content: oracleResponse,
+      source_lang: language,
+      message_type: 'oracle',
+      chat_room: 'oracle',
+    });
 
     return new Response(
       JSON.stringify({

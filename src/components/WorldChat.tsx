@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
-import { useSupabaseChat } from '@/hooks/useSupabaseChat';
+import { useWorldChat } from '@/hooks/useWorldChat';
 import { Send, User, Loader2, Users, Globe } from 'lucide-react';
 
 export function WorldChat() {
   const { isConnected, username, address, connectWallet } = useWallet();
-  const { messages, loading, sendMessage } = useSupabaseChat();
+  const { messages, loading, sendMessage } = useWorldChat();
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ export function WorldChat() {
 
     setSending(true);
     try {
-      await sendMessage(newMessage, username || 'Anon', address, 'user');
+      await sendMessage(newMessage, username || 'Anon', address);
       setNewMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -40,8 +40,8 @@ export function WorldChat() {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Filter only user messages (not oracle)
-  const worldMessages = messages.filter(m => m.message_type === 'user');
+  // All messages are now world chat messages (filtered by hook)
+  const worldMessages = messages;
 
   return (
     <section className="min-h-[calc(100vh-5rem)] py-8 relative">
