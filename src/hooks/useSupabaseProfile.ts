@@ -11,7 +11,7 @@ export function useSupabaseProfile() {
         .from('profiles')
         .select('*')
         .eq('wallet_address', walletAddress.toLowerCase())
-        .single();
+        .maybeSingle();
 
       if (existing) return existing as Profile;
 

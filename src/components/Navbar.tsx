@@ -52,15 +52,18 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center gap-6">
-          <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-            {t('nav.features')}
-          </a>
-          <a href="#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-            {t('nav.pricing')}
-          </a>
-          <a href="#oracle" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-            {t('nav.oracle')}
-          </a>
+          <Link to="/chat" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            World Chat
+          </Link>
+          <Link to="/oracle" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            Oracle AI
+          </Link>
+          <Link to="/project" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            Project
+          </Link>
+          <Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            Pricing
+          </Link>
         </div>
 
         {/* Wallet Connection */}
