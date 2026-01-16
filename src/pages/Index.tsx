@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { WalletProvider, useWallet } from '@/contexts/WalletContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
 import { FeaturesSection } from '@/components/FeaturesSection';
 import { Footer } from '@/components/Footer';
 import { UsernameModal } from '@/components/UsernameModal';
 
-function IndexContent() {
+const Index = () => {
   const { isConnected, username, profileLoaded } = useWallet();
   const [showUsernameModal, setShowUsernameModal] = useState(false);
 
@@ -29,14 +29,6 @@ function IndexContent() {
         onClose={() => setShowUsernameModal(false)} 
       />
     </div>
-  );
-}
-
-const Index = () => {
-  return (
-    <WalletProvider>
-      <IndexContent />
-    </WalletProvider>
   );
 };
 

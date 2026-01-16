@@ -67,14 +67,27 @@ Kada budemo spremni za custom domain:
 
 ---
 
+## GitHub Sync (VAŽNO!)
+
+**Lovable promjene NE idu automatski na Vercel!**
+
+Moraš ručno sync-ovati sa GitHub-om:
+
+1. U Lovable klikni **GitHub ikonu** (gore desno)
+2. Klikni **Push to GitHub** ili **Sync**
+3. Vercel će automatski pokrenuti novi deploy nakon push-a
+4. Čekaj 1-2 minute za build
+
+---
+
 ## Redeploy Checklist
 
 Kada radiš promjene:
 
+- [ ] Sync Lovable → GitHub (obavezno!)
 - [ ] Provjeri da su Environment Variables postavljene
 - [ ] Provjeri da je correct branch (main)
-- [ ] Nakon promjena u Lovable, Vercel automatski redeploy-a
-- [ ] Ako ne radi, ručno Redeploy iz Deployments tab-a
+- [ ] Čekaj da Vercel završi deploy
 
 ---
 
@@ -87,4 +100,12 @@ Kada radiš promjene:
 → Provjeri da su VITE_SUPABASE_URL i VITE_SUPABASE_ANON_KEY postavljeni
 
 ### Stara verzija se prikazuje
+→ Sync Lovable → GitHub, pa čekaj Vercel deploy
 → Hard refresh (Ctrl+Shift+R) ili očisti cache
+
+### Profile kreiranje ne radi
+→ U Supabase SQL Editor pokreni:
+```sql
+ALTER TABLE public.profiles 
+  ALTER COLUMN id SET DEFAULT gen_random_uuid();
+```
