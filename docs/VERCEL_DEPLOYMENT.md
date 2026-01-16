@@ -103,9 +103,37 @@ Kada radiš promjene:
 → Sync Lovable → GitHub, pa čekaj Vercel deploy
 → Hard refresh (Ctrl+Shift+R) ili očisti cache
 
-### Profile kreiranje ne radi
-→ U Supabase SQL Editor pokreni:
+### Profile kreiranje ne radi (FOREIGN KEY ERROR)
+
+**Error poruka:**
+```
+ERROR: 23503: insert or update on table "profiles" violates foreign key constraint "profiles_id_fkey"
+DETAIL: Key (id)=(...) is not present in table "users"
+```
+
+**Uzrok:** Tabela `profiles` ima foreign key koji referencira `auth.users`, ali OHL koristi wallet-based auth (nema Supabase users).
+
+**Rešenje - Pokreni u Supabase SQL Editor:**
 ```sql
+-- KORAK 1: Ukloni foreign key constraint
+ALTER TABLE public.profiles 
+  DROP CONSTRAINT IF EXISTS profiles_id_fkey;
+
+-- KORAK 2: Dodaj default UUID generator
 ALTER TABLE public.profiles 
   ALTER COLUMN id SET DEFAULT gen_random_uuid();
+
+-- KORAK 3 (opciono): Proveri da li je uspešno
+SELECT column_name, column_default 
+FROM information_schema.columns 
+WHERE table_name = 'profiles' AND column_name = 'id';
 ```
+
+### Admin wallet nema pristup
+Admin wallet (`0x8334966329b7f4b459633696A8CA59118253bC89`) sada automatski dobija pun pristup bez obzira na database. Ovo je hardcoded u frontend kodu za bezbednost.
+
+---
+
+## Full Documentation
+
+Za detaljnije troubleshooting, pogledaj: `docs/TROUBLESHOOTING.md`
