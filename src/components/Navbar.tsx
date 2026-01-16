@@ -92,11 +92,6 @@ export function Navbar() {
 
                 {/* Access Badges */}
                 <div className="hidden sm:flex items-center gap-2">
-                  {isAdmin && (
-                    <span className="px-2 py-1 text-xs font-display bg-red-500/20 text-red-400 rounded-full flex items-center gap-1 border border-red-500/30">
-                      <Shield className="w-3 h-3" /> ADMIN
-                    </span>
-                  )}
                   {hasDevAccess && (
                     <span className="px-2 py-1 text-xs font-display bg-oracle-gradient rounded-full text-foreground flex items-center gap-1">
                       <Zap className="w-3 h-3" /> DEV
