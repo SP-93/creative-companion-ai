@@ -17,6 +17,21 @@
 
 ### Januar 2026
 
+#### 16. Januar 2026
+- ✅ **Database Complete:** Kreirana `token_rewards` tabela
+- ✅ **RLS Policies:** Verifikovane i dodate na sve tabele (profiles, chat_messages, message_translations, payments, token_rewards)
+- ✅ **Edge Functions Deployed:**
+  - `verify-payment` - Blockchain verifikacija transakcija
+  - `admin-actions` - Admin operacije (aktivacija, revokacija, statistika)
+  - `oracle-response` - AI odgovori za DEV korisnike
+- ✅ **Supabase Secrets:** Konfigurisani OVER_RPC_URL i OPENAI_API_KEY
+- ✅ **WalletConnect Integracija:**
+  - Project ID: `8617065cc8bc205011c57eddae9d6203`
+  - Kreiran `src/lib/walletconnect.ts`
+  - Kreiran `src/components/WalletModal.tsx`
+  - Ažuriran WalletContext sa podrškom za WalletConnect
+- ✅ **Dokumentacija:** Kreiran PROJECT_STATUS.md, ažurirani svi docs
+
 #### 14. Januar 2026
 - ✅ **Frontend Setup:** Kompletiran osnovni UI sa Navbar, Hero, Features, Pricing, Footer
 - ✅ **i18n Integracija:** 10 jezika (EN, SR, DE, ES, FR, PT, RU, ZH, JA, KO)
@@ -25,8 +40,8 @@
 - ✅ **Hooks:** `useSupabaseChat`, `useSupabaseProfile` implementirani
 - ✅ **WalletContext:** Integracija sa OverProtocol, profil loading iz Supabase
 - ✅ **Vercel Deployment:** Uspješno deployano na `overhippolab-aioracle.vercel.app`
-- ⏳ **Environment Variables:** U toku - dodavanje na Vercel
-- ⏳ **RLS Policies:** Čeka se verifikacija u Supabase
+- ✅ **Environment Variables:** Konfigurisano na Vercel
+- ✅ **RLS Policies:** Verifikovano u Supabase
 
 ---
 

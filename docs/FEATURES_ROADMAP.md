@@ -57,51 +57,70 @@
 
 ---
 
+## ✅ Nedavno Završeno
+
+### Production Setup (16. Jan 2026)
+- [x] Vercel Environment Variables
+- [x] Supabase RLS Policies (sve tabele)
+- [x] Supabase Realtime za chat
+- [x] Edge Functions deployed
+- [x] WalletConnect integracija
+
+### Backend Complete
+- [x] token_rewards tabela
+- [x] verify-payment Edge Function
+- [x] admin-actions Edge Function
+- [x] oracle-response Edge Function
+- [x] Supabase Secrets konfigurisani
+
+---
+
 ## ⏳ U Toku
 
-### Production Setup
-- [ ] Vercel Environment Variables
-- [ ] Supabase RLS Policies
-- [ ] Supabase Realtime za chat
-- [ ] Production testing
+### Testing Phase
+- [ ] Wallet connect testiranje (MetaMask + WalletConnect)
+- [ ] Payment flow testiranje
+- [ ] Oracle AI testiranje
+- [ ] Production deployment
 
 ---
 
 ## 📋 Planirano
 
-### Phase 1: Core Functionality
+### Phase 1: Core Functionality ✅ ZAVRŠENO
 
 #### Chat System
-- [ ] Chat UI komponenta
-- [ ] Real-time poruke
-- [ ] Oracle mode (AI odgovori)
-- [ ] Message translation
+- [x] Chat UI komponenta
+- [x] Real-time poruke
+- [x] Oracle mode (AI odgovori)
+- [ ] Message translation (opciono)
 
 #### Payment Flow
-- [ ] OVER token price feed
-- [ ] Payment modal
-- [ ] Transaction verification
-- [ ] Automatic subscription activation
+- [x] Payment modal
+- [x] Transaction verification (Edge Function)
+- [x] Automatic subscription activation
+- [ ] OVER token price feed (opciono)
 
-### Phase 2: Admin & Management
+### Phase 2: Admin & Management ✅ ZAVRŠENO
 
 #### Admin Panel (/admin)
-- [ ] Admin wallet verifikacija
-- [ ] User lista sa pretplatama
-- [ ] Payment history
-- [ ] Platform statistika
-- [ ] Manual subscription management
+- [x] Admin wallet verifikacija
+- [x] User lista sa pretplatama
+- [x] Payment history
+- [x] Platform statistika
+- [x] Manual subscription management
 
-### Phase 3: Advanced Features
+### Phase 3: Advanced Features ✅ ZAVRŠENO
 
 #### Edge Functions
-- [ ] translate-message (DeepL API)
-- [ ] oracle-response (AI backend)
-- [ ] verify-payment (blockchain verification)
+- [x] oracle-response (AI backend)
+- [x] verify-payment (blockchain verification)
+- [x] admin-actions (admin operacije)
+- [ ] translate-message (DeepL API) - opciono
 
 #### Token Integration
-- [ ] OHL Token deploy stranica
-- [ ] Token info prikaz
+- [x] OHL Token deploy stranica
+- [x] Token info prikaz
 - [ ] Staking (future)
 
 ### Phase 4: Polish

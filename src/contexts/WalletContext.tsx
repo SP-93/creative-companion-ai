@@ -4,6 +4,9 @@ import { OVER_PROTOCOL, DevTierType } from '@/lib/constants';
 import { useSupabaseProfile } from '@/hooks/useSupabaseProfile';
 
 const WALLET_STORAGE_KEY = 'ohl_wallet_address';
+const CONNECTION_TYPE_KEY = 'ohl_connection_type';
+
+export type ConnectionType = 'metamask' | 'walletconnect' | null;
 
 interface WalletContextType {
   isConnected: boolean;
@@ -16,7 +19,12 @@ interface WalletContextType {
   balance: string;
   connecting: boolean;
   profileLoaded: boolean;
-  connectWallet: () => Promise<void>;
+  connectionType: ConnectionType;
+  showWalletModal: boolean;
+  setShowWalletModal: (show: boolean) => void;
+  connectWallet: () => void;
+  connectWithMetaMask: () => Promise<void>;
+  connectWithWalletConnect: () => Promise<void>;
   disconnectWallet: () => void;
   setUsername: (name: string) => Promise<void>;
   setBasicAccess: (access: boolean) => void;
@@ -37,6 +45,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState('0');
   const [connecting, setConnecting] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [connectionType, setConnectionType] = useState<ConnectionType>(null);
+  const [showWalletModal, setShowWalletModal] = useState(false);
   const { getOrCreateProfile, updateUsername: updateProfileUsername } = useSupabaseProfile();
 
   // Load profile from Supabase when address changes
@@ -127,15 +137,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, [address, loadProfile]);
 
-  const connectWallet = useCallback(async () => {
+  // Open wallet selection modal
+  const connectWallet = useCallback(() => {
+    setShowWalletModal(true);
+  }, []);
+
+  // Connect with MetaMask
+  const connectWithMetaMask = useCallback(async () => {
     if (typeof window.ethereum === 'undefined') {
-      alert('Please install MetaMask or another Web3 wallet!');
+      window.open('https://metamask.io/download/', '_blank');
       return;
     }
 
     setConnecting(true);
+    setConnectionType('metamask');
     try {
-      // Request account access
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_requestAccounts', []);
       
@@ -143,21 +159,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const userAddress = accounts[0];
         setAddress(userAddress);
         
-        // Save to localStorage for persistence
         localStorage.setItem(WALLET_STORAGE_KEY, userAddress);
+        localStorage.setItem(CONNECTION_TYPE_KEY, 'metamask');
         
-        // Get balance
         const balanceWei = await provider.getBalance(userAddress);
         setBalance(ethers.formatEther(balanceWei));
         
-        // Try to switch to OverProtocol network
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: OVER_PROTOCOL.chainIdHex }],
           });
         } catch (switchError: any) {
-          // Chain not added, try to add it
           if (switchError.code === 4902) {
             await window.ethereum.request({
               method: 'wallet_addEthereumChain',
@@ -176,17 +189,33 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           }
         }
         
-        // Load profile from Supabase
         await loadProfile(userAddress);
-        
         setIsConnected(true);
+        setShowWalletModal(false);
       }
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
+      console.error('Failed to connect MetaMask:', error);
+      setConnectionType(null);
     } finally {
       setConnecting(false);
     }
   }, [loadProfile]);
+
+  // Connect with WalletConnect - opens QR modal
+  const connectWithWalletConnect = useCallback(async () => {
+    setConnecting(true);
+    setConnectionType('walletconnect');
+    try {
+      // For now, show alert - full WalletConnect requires more setup
+      alert('WalletConnect QR: Uskoro dostupno! Za sada koristite MetaMask.');
+      setShowWalletModal(false);
+    } catch (error) {
+      console.error('Failed to connect WalletConnect:', error);
+    } finally {
+      setConnecting(false);
+      setConnectionType(null);
+    }
+  }, []);
 
   const disconnectWallet = useCallback(() => {
     setIsConnected(false);
@@ -198,7 +227,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setDevExpiresAt(null);
     setBalance('0');
     setProfileLoaded(false);
+    setConnectionType(null);
     localStorage.removeItem(WALLET_STORAGE_KEY);
+    localStorage.removeItem(CONNECTION_TYPE_KEY);
   }, []);
 
   const setUsername = useCallback(async (name: string) => {
@@ -230,7 +261,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         balance,
         connecting,
         profileLoaded,
+        connectionType,
+        showWalletModal,
+        setShowWalletModal,
         connectWallet,
+        connectWithMetaMask,
+        connectWithWalletConnect,
         disconnectWallet,
         setUsername,
         setBasicAccess,
