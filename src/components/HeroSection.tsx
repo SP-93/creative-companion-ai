@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { Wallet, Sparkles, MessageSquare, Cpu } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import hippoHero from '@/assets/hippo-hero.png';
 
 export function HeroSection() {
@@ -97,20 +98,20 @@ export function HeroSection() {
                   {connecting ? 'Connecting...' : 'Connect Wallet'}
                 </Button>
               ) : (
-                <Button variant="cyber" size="xl" asChild>
-                  <a href="#chat">
+                <Link to="/chat">
+                  <Button variant="cyber" size="xl">
                     <MessageSquare className="w-5 h-5" />
                     Enter Chat
-                  </a>
-                </Button>
+                  </Button>
+                </Link>
               )}
               
-              <Button variant="neon" size="xl" asChild>
-                <a href="#pricing">
+              <Link to="/pricing">
+                <Button variant="neon" size="xl">
                   <Sparkles className="w-5 h-5" />
                   View Pricing
-                </a>
-              </Button>
+                </Button>
+              </Link>
             </motion.div>
 
             {/* Stats */}
