@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { ethers } from 'ethers';
-import { OVER_PROTOCOL, DevTierType } from '@/lib/constants';
+import { OVER_PROTOCOL, DevTierType, ADMIN_WALLET } from '@/lib/constants';
 import { useSupabaseProfile } from '@/hooks/useSupabaseProfile';
 
 const WALLET_STORAGE_KEY = 'ohl_wallet_address';
 const CONNECTION_TYPE_KEY = 'ohl_connection_type';
+
+// Normalize admin wallet for comparison
+const ADMIN_WALLET_NORMALIZED = ADMIN_WALLET.toLowerCase();
 
 export type ConnectionType = 'metamask' | 'walletconnect' | null;
 
@@ -21,6 +24,7 @@ interface WalletContextType {
   profileLoaded: boolean;
   connectionType: ConnectionType;
   showWalletModal: boolean;
+  isAdmin: boolean;
   setShowWalletModal: (show: boolean) => void;
   connectWallet: () => void;
   connectWithMetaMask: () => Promise<void>;
@@ -49,20 +53,42 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { getOrCreateProfile, updateUsername: updateProfileUsername } = useSupabaseProfile();
 
+  // Check if current address is admin
+  const isAdmin = address?.toLowerCase() === ADMIN_WALLET_NORMALIZED;
+
   // Load profile from Supabase when address changes
   const loadProfile = useCallback(async (walletAddress: string) => {
     setProfileLoaded(false);
+    const isAdminWallet = walletAddress.toLowerCase() === ADMIN_WALLET_NORMALIZED;
+    
     try {
       const profile = await getOrCreateProfile(walletAddress);
+      
       if (profile) {
-        setUsernameState(profile.username);
-        setBasicAccess(profile.has_basic_access);
-        setDevTierState(profile.dev_tier as DevTierType);
-        setDevExpiresAt(profile.dev_expires_at ? new Date(profile.dev_expires_at) : null);
-        setDevAccess(profile.dev_tier !== 'none');
+        setUsernameState(profile.username || (isAdminWallet ? 'Admin' : null));
+        // Admin always has full access regardless of database
+        setBasicAccess(isAdminWallet ? true : profile.has_basic_access);
+        setDevTierState(isAdminWallet ? 'monthly' : (profile.dev_tier as DevTierType));
+        setDevExpiresAt(isAdminWallet ? null : (profile.dev_expires_at ? new Date(profile.dev_expires_at) : null));
+        setDevAccess(isAdminWallet ? true : profile.dev_tier !== 'none');
+      } else if (isAdminWallet) {
+        // Admin wallet - grant full access even without profile
+        console.log('Admin wallet detected - granting full access');
+        setUsernameState('Admin');
+        setBasicAccess(true);
+        setDevTierState('monthly');
+        setDevExpiresAt(null);
+        setDevAccess(true);
       }
     } catch (error) {
       console.error('Failed to load profile:', error);
+      // Even on error, grant admin access if it's the admin wallet
+      if (isAdminWallet) {
+        setUsernameState('Admin');
+        setBasicAccess(true);
+        setDevTierState('monthly');
+        setDevAccess(true);
+      }
     } finally {
       setProfileLoaded(true);
     }
@@ -71,38 +97,58 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   // Auto-reconnect on page load if wallet was previously connected
   useEffect(() => {
     const savedAddress = localStorage.getItem(WALLET_STORAGE_KEY);
-    if (savedAddress && typeof window.ethereum !== 'undefined') {
-      // Try to auto-reconnect
-      const autoReconnect = async () => {
+    const savedConnectionType = localStorage.getItem(CONNECTION_TYPE_KEY) as ConnectionType;
+    
+    if (savedAddress) {
+      // Add delay to ensure MetaMask is fully loaded
+      const timer = setTimeout(async () => {
+        if (typeof window.ethereum === 'undefined') {
+          console.log('MetaMask not detected, clearing saved wallet');
+          localStorage.removeItem(WALLET_STORAGE_KEY);
+          localStorage.removeItem(CONNECTION_TYPE_KEY);
+          return;
+        }
+
         try {
           setConnecting(true);
           const provider = new ethers.BrowserProvider(window.ethereum);
+          
+          // Use eth_accounts (not eth_requestAccounts) to avoid popup
           const accounts = await provider.send('eth_accounts', []);
           
           if (accounts.length > 0 && accounts[0].toLowerCase() === savedAddress.toLowerCase()) {
-            setAddress(accounts[0]);
+            const userAddress = accounts[0];
+            setAddress(userAddress);
+            setConnectionType(savedConnectionType || 'metamask');
             
             // Get balance
-            const balanceWei = await provider.getBalance(accounts[0]);
-            setBalance(ethers.formatEther(balanceWei));
+            try {
+              const balanceWei = await provider.getBalance(userAddress);
+              setBalance(ethers.formatEther(balanceWei));
+            } catch (balanceError) {
+              console.warn('Could not fetch balance:', balanceError);
+            }
             
             // Load profile
-            await loadProfile(accounts[0]);
-            
+            await loadProfile(userAddress);
             setIsConnected(true);
+            console.log('Auto-reconnected successfully:', userAddress.slice(0, 10) + '...');
           } else {
             // Wallet disconnected or switched accounts
+            console.log('Wallet account changed or disconnected');
             localStorage.removeItem(WALLET_STORAGE_KEY);
+            localStorage.removeItem(CONNECTION_TYPE_KEY);
           }
         } catch (error) {
           console.error('Auto-reconnect failed:', error);
           localStorage.removeItem(WALLET_STORAGE_KEY);
+          localStorage.removeItem(CONNECTION_TYPE_KEY);
         } finally {
           setConnecting(false);
         }
-      };
+      }, 500); // 500ms delay for MetaMask to initialize
       
-      autoReconnect();
+      return () => clearTimeout(timer);
     }
   }, [loadProfile]);
 
@@ -263,6 +309,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         profileLoaded,
         connectionType,
         showWalletModal,
+        isAdmin,
         setShowWalletModal,
         connectWallet,
         connectWithMetaMask,

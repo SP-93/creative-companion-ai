@@ -114,7 +114,7 @@ export function HeroSection() {
               </Link>
             </motion.div>
 
-            {/* Stats */}
+            {/* Stats - Projected Goals */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,13 +122,14 @@ export function HeroSection() {
               className="grid grid-cols-3 gap-6 mt-12"
             >
               {[
-                { label: 'Active Users', value: '2.5K+' },
-                { label: 'Questions Answered', value: '50K+' },
-                { label: 'OH.L Staked', value: '$1.2M' },
+                { label: 'Target Users', value: '2.5K+', note: 'Goal' },
+                { label: 'AI Responses', value: '50K+', note: 'Projected' },
+                { label: 'OHL Ecosystem', value: '$1.2M', note: 'Target' },
               ].map((stat, i) => (
                 <div key={i} className="text-center lg:text-left">
                   <div className="font-display text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
                   <div className="text-xs text-muted-foreground uppercase tracking-wide">{stat.label}</div>
+                  <div className="text-[10px] text-muted-foreground/50 italic mt-0.5">{stat.note}</div>
                 </div>
               ))}
             </motion.div>
